@@ -5,6 +5,12 @@ import * as path 		from "https://deno.land/std/path/mod.ts";
 // Helpers
 import { timestamp }	from "../../../helpers/string.ts";
 
+// Interfaces
+import iTransaction from "../../../interfaces/iTransaction.ts";
+
+// Enums
+import TransactionType from "../../../enums/TransactionType.ts";
+
 /*
  * Logger is responsible for saving txt files that register every event occurred
  * within catbot
@@ -13,46 +19,54 @@ import { timestamp }	from "../../../helpers/string.ts";
 
  export default class Logger {
 
-	/*
-	 * Saves the buy operation
-	 */
-	public static buy () {
-		const date = timestamp();
+    //-------------------------------------------------
+    // Event methods
+	//-------------------------------------------------
 
-		Logger.save(`purchases/${date}`, `${date} (date) - bought two bitcoins\n`);
+	public static onBuy (value : number) {
+		Logger.sell({
+			type	: TransactionType.Sale,
+			value	: value,
+			date	: new Date,
+		});
 	}
 
-	/*
-	 * Saves the sell operation
-	 */
-	public static sell () {
-		const date = timestamp();
-
-		Logger.save(`sales/${date}`, `${date} (date) - sold two bitcoins\n`);
+	public static onSell (value : number) {
+		Logger.sell({
+			type	: TransactionType.Sale,
+			value	: value,
+			date	: new Date,
+		});
 	}
 
-	/*
-	 * Saves the coin current value
-	 */
-	public static value () {
-		const date = timestamp();
-
-		Logger.save(`value/${date}`, `${date} (date) - bitcoin has $2.000 market value\n`);
+	public static onUpdateValue (value : number) {
+		Logger.value(value);
 	}
 
-	/*
-	 * Print a generic message
-	 */
+    //-------------------------------------------------
+    // Main methods
+	//-------------------------------------------------
+
+	public static buy (transaction : iTransaction) {
+		Logger.save(`purchases/${timestamp(transaction.date)}`, `${timestamp(transaction.date, true)} (date) - bought R$ ${transaction.value.toFixed(2)} bitcoins\n`);
+	}
+
+	public static sell (transaction : iTransaction) {
+		Logger.save(`purchases/${timestamp(transaction.date)}`, `${timestamp(transaction.date, true)} (date) - sold R$ ${transaction.value.toFixed(2)} bitcoins\n`);
+	}
+
+	public static value (value : number) {
+		Logger.save(`value/${timestamp()}`, `${timestamp(undefined, true)} (date) - bitcoin has R$ ${value.toFixed(2)} market value\n`);
+	}
+
 	public static general (text : string) {
-		const date = timestamp();
-
-		Logger.save(`general/${date}`, `${date} (date) - ${text}\n`);
+		Logger.save(`general/${timestamp()}`, `${timestamp(undefined, true)} (date) - ${text}\n`);
 	}
 
-	/*
-	 * Check if directory path exists, create file if it doesn't exist
-	 * and append if already exists
-	 */
+    //-------------------------------------------------
+    // Helper methods
+	//-------------------------------------------------
+
 	private static async save (pathToSave : string, stringToSave : string) {
 		const encoder 	= new TextEncoder();
 		const text 		= encoder.encode(stringToSave + "\n");

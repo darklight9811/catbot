@@ -4,6 +4,12 @@ import format from 'https://deno.land/x/color/index.ts';
 // Helpers
 import { timestamp }	from "../../../helpers/string.ts";
 
+// Interfaces
+import iTransaction from "../../../interfaces/iTransaction.ts";
+
+// Enums
+import TransactionType from "../../../enums/TransactionType.ts";
+
 /*
  * Logger is responsible for saving txt files that register every event occurred
  * within catbot
@@ -12,6 +18,10 @@ import { timestamp }	from "../../../helpers/string.ts";
 
  export default class Screenie {
 
+    //-------------------------------------------------
+    // Properties
+	//-------------------------------------------------
+
 	// Monetary values
 	private static _balance : number = 0;
 	private static _value	: number = 0;
@@ -19,50 +29,64 @@ import { timestamp }	from "../../../helpers/string.ts";
 	//Feedback values
 	private static _lastMessage : string = "";
 
-	/*
-	 * Shows a transaction
-	 */
-	public static transaction () {
+    //-------------------------------------------------
+    // Event methods
+	//-------------------------------------------------
 
-		const message = "yay";
-
-		Screenie.print(message);
+	public static onBuy (value : number) {
+		Screenie.transaction({
+			type	: TransactionType.Purchase,
+			value	: value,
+			date	: new Date,
+		});
 	}
 
-	/*
-	 * Shows your purse balance
-	 */
+	public static onSell (value : number) {
+		Screenie.transaction({
+			type	: TransactionType.Sale,
+			value	: value,
+			date	: new Date,
+		});
+	}
+
+	public static onUpdateValue (value : number) {
+		Screenie.value(value);
+	}
+
+	public static onUpdateBalance (value : number) {
+		Screenie.balance(value);
+	}
+
+    //-------------------------------------------------
+    // Main methods
+	//-------------------------------------------------
+
+	public static transaction (transaction : iTransaction) {
+		const action 	= transaction.type === TransactionType.Purchase ? "purchased":"sold";
+		const value 	= "R$ " + transaction.value.toFixed(2);
+
+		Screenie.print(`${action} ${value}`, timestamp(transaction.date, true));
+	}
+
 	public static balance (value : number) {
 		Screenie._balance = value;
 		Screenie.print(Screenie._lastMessage);
 	}
 
-	/*
-	 * Shows the current coin value
-	 */
 	public static value (value : number) {
 		Screenie._value = value;
 		Screenie.print(Screenie._lastMessage);
 	}
 
-	/*
-	 * Display a generic message
-	 */
 	public static generic (message : string) {
 		Screenie.print(message);
 	}
 
-	/*
-	 * Clear the terminal
-	 */
 	public static clear () {
 		console.log("\x1B[2J\x1B[1;1H");
 	}
 
-	/*
-	 * Clear the terminal
-	 */
-	public static print (value : string) {
+	public static print (value : string, stamp? : string) {
 		Screenie.clear();
 		// Header
 		console.log(format.bgBlue.text(" CATbot ") + format.reset.text("") + format.blue.text(" made by Rafael Corrêa") + format.reset.text(""));
@@ -73,7 +97,7 @@ import { timestamp }	from "../../../helpers/string.ts";
 
 		// Message
 		console.log("");
-		console.log(format.bgGreen.text(timestamp()) + format.reset.text("") + " " + value);
+		console.log(format.bgGreen.text(` ${stamp ? stamp : timestamp()} `) + format.reset.text("") + " " + value);
 
 		// Set as last message
 		Screenie._lastMessage = value;
