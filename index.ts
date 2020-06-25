@@ -5,9 +5,6 @@ import { config } 	from "https://deno.land/x/dotenv/mod.ts";
 // Start bot
 import "./src/boot/bot.ts";
 
-// Variables
-const port 		= +config().SERVER_PORT;
-const host		= config().SERVER_HOST;
-const server 	= serve({ port:port,hostname:host });
-
-console.log(`starting server with port ${port}`);
+// File tests
+import Screenie from "./src/classes/extensions/screenie/index.ts";
+Screenie.generic("yay message");
