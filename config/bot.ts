@@ -16,11 +16,15 @@ import Screenie from "../src/classes/extensions/screenie/index.ts";
  * Overwrite to the bot
  */
 export default {
-	strategy	: strategy,
-	source 		: source,
+	strategy	: new strategy,
+	source 		: new source,
 	refresh		: +config().BOT_REFRESH,
 	extensions 	: [
 		Logger,
 		Screenie
-	]
+	],
+	credentials	: {
+		key		: config().BOT_TOKEN,
+		secret	: config().BOT_SECRET,
+	}
 } as iConfig;

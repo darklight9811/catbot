@@ -1,6 +1,6 @@
 //Interfaces
 import iStrategy from "../interface.ts";
 
-export default {
+export default class Strategy implements iStrategy {
 
-} as iStrategy;
+}

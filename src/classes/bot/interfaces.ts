@@ -1,6 +1,15 @@
+// Interfaces
+import iSource 		from "../../interfaces/iSource.ts";
+import iStrategy 	from "../strategy/interface.ts";
+import iExtension 	from "../../interfaces/iExtension.ts";
+
 export interface iConfig {
-	source		: Object,
-	strategy	: Object,
+	source		: iSource,
+	strategy	: iStrategy,
 	refresh		: number,
-	extensions	: Object[]
+	extensions	: iExtension[],
+	credentials	: {
+		key		: string,
+		secret	: string,
+	}
 }

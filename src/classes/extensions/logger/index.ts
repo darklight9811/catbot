@@ -7,6 +7,8 @@ import { timestamp }	from "../../../helpers/string.ts";
 
 // Interfaces
 import iTransaction from "../../../interfaces/iTransaction.ts";
+import iCoin 		from "../../../interfaces/iCoin.ts";
+import iExtension 	from "../../../interfaces/iExtension.ts";
 
 // Enums
 import TransactionType from "../../../enums/TransactionType.ts";
@@ -17,7 +19,7 @@ import TransactionType from "../../../enums/TransactionType.ts";
  *
  */
 
- export default class Logger {
+ export default class Logger implements iExtension {
 
     //-------------------------------------------------
     // Event methods
@@ -28,6 +30,10 @@ import TransactionType from "../../../enums/TransactionType.ts";
 			type	: TransactionType.Sale,
 			value	: value,
 			date	: new Date,
+			coin	: {
+				name		: "bitcoin",
+				initials	: "btc",
+			},
 		});
 	}
 
@@ -36,11 +42,19 @@ import TransactionType from "../../../enums/TransactionType.ts";
 			type	: TransactionType.Sale,
 			value	: value,
 			date	: new Date,
+			coin	: {
+				name		: "bitcoin",
+				initials	: "btc",
+			},
 		});
 	}
 
-	public static onUpdateValue (value : number) {
-		Logger.value(value);
+	public static onUpdateValue (value : number, coin : iCoin) {
+		Logger.value(value, coin);
+	}
+
+	public static onGeneric (text : string) {
+		Logger.general(text);
 	}
 
     //-------------------------------------------------
@@ -48,19 +62,19 @@ import TransactionType from "../../../enums/TransactionType.ts";
 	//-------------------------------------------------
 
 	public static buy (transaction : iTransaction) {
-		Logger.save(`purchases/${timestamp(transaction.date)}`, `${timestamp(transaction.date, true)} (date) - bought R$ ${transaction.value.toFixed(2)} bitcoins\n`);
+		Logger.save(`purchases/${timestamp(transaction.date)}`, `${timestamp(transaction.date, true)} (date) - bought R$ ${transaction.value.toFixed(2)} worth in ${transaction.coin.name}`);
 	}
 
 	public static sell (transaction : iTransaction) {
-		Logger.save(`purchases/${timestamp(transaction.date)}`, `${timestamp(transaction.date, true)} (date) - sold R$ ${transaction.value.toFixed(2)} bitcoins\n`);
+		Logger.save(`sales/${timestamp(transaction.date)}`, `${timestamp(transaction.date, true)} (date) - sold R$ ${transaction.value.toFixed(2)} worth in ${transaction.coin.name}`);
 	}
 
-	public static value (value : number) {
-		Logger.save(`value/${timestamp()}`, `${timestamp(undefined, true)} (date) - bitcoin has R$ ${value.toFixed(2)} market value\n`);
+	public static value (value : number, coin : iCoin) {
+		Logger.save(`value/${timestamp()}`, `${timestamp(undefined, true)} (date) - ${coin.name} has R$ ${value.toFixed(2)} market value`);
 	}
 
 	public static general (text : string) {
-		Logger.save(`general/${timestamp()}`, `${timestamp(undefined, true)} (date) - ${text}\n`);
+		Logger.save(`general/${timestamp()}`, `${timestamp(undefined, true)} (date) - ${text}`);
 	}
 
     //-------------------------------------------------

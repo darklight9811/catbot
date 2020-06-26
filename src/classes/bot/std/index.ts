@@ -1,7 +1,8 @@
 //Interfaces
 import { iConfig } 	from "../interfaces.ts";
-import iSource		from "../../source/interface.ts";
 import iStrategy	from "../../strategy/interface.ts";
+import iSource		from "../../../interfaces/iSource.ts";
+import iExtension 	from "../../../interfaces/iExtension.ts";
 
 //Strategies
 import stdStrategy 	from "../../strategy/basic/index.ts";
@@ -21,17 +22,20 @@ export default class CatBot {
 	refresh		: number;
 	source 		: iSource;
 	strategy 	: iStrategy;
-	extensions	: any[];
+	extensions	: iExtension[];
+	credentials : Object;
+	stop		: boolean = false;
 
     //-------------------------------------------------
     // Core methods
     //-------------------------------------------------
 	
 	constructor (data? : iConfig) {
-		this.refresh	= data?.refresh 	? data.refresh 		: 5;
-		this.source 	= data?.source 		? data.source 		: stdSource;
-		this.strategy 	= data?.strategy 	? data.strategy 	: stdStrategy;
-		this.extensions	= data?.extensions	? data.extensions	: [];
+		this.refresh		= data?.refresh 	? data.refresh 		: 5;
+		this.source 		= data?.source 		? data.source 		: new stdSource;
+		this.strategy 		= data?.strategy 	? data.strategy 	: new stdStrategy;
+		this.extensions		= data?.extensions	? data.extensions	: [];
+		this.credentials	= data?.credentials ? data.credentials	: {};
 	}
 
     //-------------------------------------------------
@@ -39,9 +43,25 @@ export default class CatBot {
 	//-------------------------------------------------
 	
 	public run () {
-		this.buy(10);
+		// Not logged
+		if (!this.source.isLogged()) {
+			this.source.setCredentials(this.credentials);
 
-		setTimeout(this.run, this.refresh * 60000);
+			// Try to force login
+			if (!this.source.login()) {
+				this.stop = true;
+				
+				// Tell extensions that the bot crashed
+				for (let i = 0; i < this.extensions.length; i++) {
+					const extension = this.extensions[i];
+
+					if (extension.onGeneric) extension.onGeneric("The bot has paused because of missing credentials");
+				}
+			}
+		}
+
+		// Loop bot until it finds an error
+		if (!this.stop) setTimeout(this.run, this.refresh * 60000);
 	}
 
 	public buy (value : number) {
@@ -65,7 +85,7 @@ export default class CatBot {
 	}
 
 	public getValue () {
-		const coinValue = 0;
+		const coinValue = this.source.getCoinValue();
 
 		// Tell extensions that we updated coin value
 		for (let i = 0; i < this.extensions.length; i++) {
@@ -76,7 +96,7 @@ export default class CatBot {
 	}
 
 	public getBalance () {
-		const balanceValue = 0;
+		const balanceValue = this.source.getWalletValue();
 
 		// Tell extensions that we updated balance
 		for (let i = 0; i < this.extensions.length; i++) {

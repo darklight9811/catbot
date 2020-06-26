@@ -6,6 +6,7 @@ import { timestamp }	from "../../../helpers/string.ts";
 
 // Interfaces
 import iTransaction from "../../../interfaces/iTransaction.ts";
+import iExtension 	from "../../../interfaces/iExtension.ts";
 
 // Enums
 import TransactionType from "../../../enums/TransactionType.ts";
@@ -16,7 +17,7 @@ import TransactionType from "../../../enums/TransactionType.ts";
  *
  */
 
- export default class Screenie {
+ export default class Screenie implements iExtension {
 
     //-------------------------------------------------
     // Properties
@@ -38,6 +39,10 @@ import TransactionType from "../../../enums/TransactionType.ts";
 			type	: TransactionType.Purchase,
 			value	: value,
 			date	: new Date,
+			coin	: {
+				name		: "bitcoin",
+				initials	: "btc",
+			},
 		});
 	}
 
@@ -46,6 +51,10 @@ import TransactionType from "../../../enums/TransactionType.ts";
 			type	: TransactionType.Sale,
 			value	: value,
 			date	: new Date,
+			coin	: {
+				name		: "bitcoin",
+				initials	: "btc",
+			},
 		});
 	}
 
@@ -55,6 +64,10 @@ import TransactionType from "../../../enums/TransactionType.ts";
 
 	public static onUpdateBalance (value : number) {
 		Screenie.balance(value);
+	}
+
+	public static onGeneric (value : string) {
+		Screenie.generic(value);
 	}
 
     //-------------------------------------------------
@@ -93,7 +106,7 @@ import TransactionType from "../../../enums/TransactionType.ts";
 		
 		// Monetary values
 		console.log("Your current balance is: \tR$ " + Screenie._balance.toFixed(2));
-		console.log("Bitcoin current value is: \tR$ " + Screenie._value.toFixed(2));
+		console.log("Coin current value is: \t\tR$ " + Screenie._value.toFixed(2));
 
 		// Message
 		console.log("");
